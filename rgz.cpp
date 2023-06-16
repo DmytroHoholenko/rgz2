@@ -63,6 +63,13 @@ void addKeyWords(char* matrix[], const char* w1, const char* w2, int row, int co
     }
 }
 
+void addKeyWords2(char* matrix[], const char* w2, int row, int col) {
+    matrix[0][0] = ' ';
+    for (int i = 1; i < col; i++) {
+        matrix[i][0] = w2[i - 1];
+    }
+}
+
 void sortRows(char* matrix[], int row, int col)
 {   
     for (int i = 0; i < row; i++) {
@@ -132,6 +139,7 @@ int main() {
     cout << endl;
 
     sortRows(matrix, 5, 5);
+    addKeyWords2(matrix,"fish", 5, 5);
     sortColumns(matrix, 5, 5);
 
     for (int i = 0; i < row; i++) {
