@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstring>
 #include <algorithm>
+#include <vector>
 
 using namespace std;
 
@@ -56,34 +57,28 @@ void bin2let(fstream& binFile, fstream& bin2letFile, char* matrix[], int row, in
 void addKeyWords(char* matrix[], const char* w1, const char* w2, int row, int col) {
     matrix[0][0] = ' ';
     for (int i = 1; i < row; i++) {
-        matrix[i][0] = w2[i - 1];
-    }
-    for (int i = 1; i < col; i++) {
         matrix[0][i] = w1[i - 1];
     }
+    for (int i = 1; i < col; i++) {
+        matrix[i][0] = w2[i - 1];
+    }
 }
 
 
-void sortRows(char* matrix[], int row, int col) {
-    for (int i = 1; i < col; i++) {
-        int max = i;
-        for (int j = i + 1; j < row; j++) {
-            if (matrix[max][0] > matrix[j][0])
-                max = j;
-        }
-        if (max != i) {
-            for (int j = 0; j < row; j++) {
-                int tmp = matrix[max][j];
-                matrix[max][j] = matrix[i][j];
-                matrix[i][j] = tmp;
-            }
+/*void sortRows(char* matrix[], int row, int col)
+{
+    for (int j = 1; j < col; j++)
+    {
+        for (int i = 0; i < row; i++) {
+            sort(matrix[i] + 1, matrix[i] + col);
         }
     }
 }
 
-void sortColumns(char* matrix[], int row, int col) {
+void sortColumns(char* matrix[], int row, int col) 
+{
     for (int j = 0; j < col; j++) {
-        char* column = new char[row];
+        char* column = new char [row];
         for (int i = 0; i < row; i++) {
             column[i] = matrix[i][j];
         }
@@ -92,6 +87,90 @@ void sortColumns(char* matrix[], int row, int col) {
             matrix[i][j] = column[i];
         }
     }
+}*/
+
+/*void sortrow(char* matrix[], int row, int col)
+{
+    char** columnArray = new char* [row];
+    for (int i = 0; i < row; i++) {
+        columnArray[i] = new char[col];
+    }
+    for (int i = 0; i < row; i++) 
+    {
+        for (int j = 1; j < row; j++)
+        {
+            columnArray[i][j] = matrix[i][j];
+        }
+    }
+    sort(columnArray, columnArray + row);
+    for (int i = 0; i < row; i++) 
+    {
+        for (int j = 1; j < row; j++)
+        {
+            matrix[i][j] = columnArray[i][j];
+        }
+    }
+    delete[] columnArray;
+}*/
+
+void sortRow(char* matrix[], int row, int col) {
+    for (size_t colIndex = 1; colIndex < 5; colIndex++) {
+        for (size_t i = 1; i < row; i++) {
+            size_t min = i;
+
+            for (size_t j = i + 1; j < row; j++) {
+                if (matrix[j][colIndex] < matrix[min][colIndex]) {
+                    min = j;
+                }
+            }
+
+            if (min != i) {
+                char* tmp = matrix[i];  
+                matrix[i] = matrix[min];
+                matrix[min] = tmp;
+            }
+        }
+    }
+}
+
+void sortCols(char** matrix, int rows, int cols) {
+   
+    char* tempRow = new char[cols];
+    std::copy(matrix[0], matrix[0] + cols, tempRow);
+
+    std::sort(tempRow, tempRow + cols);
+
+
+    char** tempMatrix = new char* [rows];
+    for (int i = 0; i < rows; i++) {
+        tempMatrix[i] = new char[cols];
+    }
+
+    for (int j = 0; j < cols; j++) {
+        char letter = tempRow[j];
+        int originalIndex = -1;
+
+        for (int k = 0; k < cols; k++) {
+            if (matrix[0][k] == letter) {
+                originalIndex = k;
+                break;
+            }
+        }
+
+        for (int i = 0; i < rows; i++) {
+            tempMatrix[i][j] = matrix[i][originalIndex];
+        }
+    }
+
+    for (int i = 0; i < rows; i++) {
+        std::copy(tempMatrix[i], tempMatrix[i] + cols, matrix[i]);
+    }
+
+    for (int i = 0; i < rows; i++) {
+        delete[] tempMatrix[i];
+    }
+    delete[] tempMatrix;
+    delete[] tempRow;
 }
 
 
@@ -130,8 +209,26 @@ int main() {
         matrix[i] = new char[col];
     }
 
-    addKeyWords(matrix, "save", "fish", row, col);
-    bin2let(binFile, bin2letFile, matrix, row, col);
+    bin2let(binFile, bin2letFile, matrix, 5, 5);
+    addKeyWords(matrix, "save", "fish", 5, 5);
+
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++)
+            cout << matrix[i][j] << ' ';
+        cout << endl;
+    }
+
+    cout << endl;
+
+    
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++)
+            cout << matrix[i][j] << ' ';
+        cout << endl;
+    }
+    cout << endl;
+    
+    sortRow(matrix, row, col);
 
     for (int i = 0; i < row; i++) {
         for (int j = 0; j < col; j++)
@@ -139,34 +236,26 @@ int main() {
         cout << endl;
     }
     cout << endl;
+
+    sortCols(matrix, row, col);
+
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++)
+            cout << matrix[i][j] << ' ';
+        cout << endl;
+    }
+    cout << endl;
+
     binFile.close();
     bin2letFile.close();
     // ===========================
 
-    // === sort ==================
-    sortRows(matrix, row, col);
-    for (int i = 0; i < row; i++) {
-        for (int j = 0; j < col; j++)
-            cout << matrix[i][j] << ' ';
-        cout << endl;
-    }
-    cout << endl;
-    /*sortColumns(matrix, row, col);
-
-    for (int i = 0; i < row; i++) {
-        for (int j = 0; j < col; j++)
-            cout << matrix[i][j] << ' ';
-        cout << endl;
-    }*/
-
-    
-    // ===========================
-
     // === del arr ===============
-    for (int i = 0; i < row; i++)
+    for (int i = 0; i < col; i++)
         delete[] matrix[i];
     delete[] matrix;
     // ===========================
 
     return 0;
 }
+
