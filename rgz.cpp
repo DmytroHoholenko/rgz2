@@ -6,39 +6,41 @@
 using namespace std;
 
 void dec2bin(fstream& decFile, fstream& binFile) {
+    int decNum;
     while (!decFile.eof()) {
-        int decNum;
         char binRev[] = "00000000";
-
         decFile >> decNum;
-        for (int i = 0; decNum > 0; i++) {
+        for (int i = 7; decNum > 0; i--) {
             binRev[i] = decNum % 2 + 48;
             decNum /= 2;
-        }
-        for (int i = 0; i < 4; i++) {
-            char buff = binRev[i];
-            binRev[i] = binRev[8 - i - 1];
-            binRev[8 - i - 1] = buff;
         }
         binFile << binRev;
     }
 }
 
-void bin2let(fstream& binFile, fstream& bin2letFile, char* matrix[], int row, int col) {
+void bin2let(fstream& binFile, fstream& bin2letFile, char* matrix[], int row, int col, int numNum) {
     char bin1[9];
     char bin2[9];
     char let;
+    int j = 0;
     for (int m = 1; m < row; m++) {
         for (int n = 1; n < col; n++) {
-            binFile.get(bin1, 9);
-            bin2letFile.seekg(0);
-            while (!bin2letFile.eof()) {
-                bin2letFile >> bin2;
-                bin2letFile >> let;
-                if (strcmp(bin1, bin2) == 0) {
-                    matrix[m][n] = let;
-                    break;
+            if (j < numNum) {
+                binFile.get(bin1, 9);
+                bin2letFile.seekg(0);
+                while (!bin2letFile.eof()) {
+                    bin2letFile >> bin2;
+                    bin2letFile >> let;
+                    if (strcmp(bin1, bin2) == 0) {
+                        matrix[m][n] = let;
+                        j++;
+                        break;
+                    }
                 }
+            }
+            else {
+                matrix[m][n] = ' ';
+                j++;
             }
         }
     }
@@ -113,22 +115,28 @@ int main() {
     // === get num ===============
     int numNum, number;
     decFile.open("dec.txt", std::fstream::out);
-    cout << "Set number(double) of numbers: ";
-    do {
-        cin >> numNum;
-        if (numNum % 2 != 0) {
-            cout << "Set other number!\n";
-        }
-    } while (numNum % 2 != 0);
-
-    cout << "Set digits: ";
+    cout << "Set number of numbers: ";
+    cin >> numNum;
+    cout << "Set numbers: ";
     for (int i = 0; i < numNum; i++) {
         cin >> number;
         decFile << number;
         if (i + 1 != numNum)
             decFile << ' ';
+
     }
     decFile.close();
+    // ===========================
+
+    // === get key words =========
+    char w1[10] = "";
+    char w2[10] = "";
+    int row, col;
+    cout << "Set key words: ";
+    cin >> w1;
+    cin >> w2;
+    row = strlen(w2);
+    col = strlen(w1);
     // ===========================
 
     // === dec2bin ===============
@@ -143,21 +151,6 @@ int main() {
 
     decFile.close();
     binFile.close();
-    // ===========================
-
-    // === get key words =========
-    char w1[10] = "";
-    char w2[10] = "";
-    int row, col;
-    cout << "Set key words. Condition: len(w1)*len(w2) == number of numbers\n";
-    do {
-        cin >> w1;
-        cin >> w2;
-        row = strlen(w2);
-        col = strlen(w1);
-        if (row * col != numNum)
-            cout << "Set other words!\n";
-    } while (row * col != numNum);
     // ===========================
 
     // === bin2let ===============
@@ -176,7 +169,7 @@ int main() {
     }
 
     addKeyWords(matrix, w1, w2, row, col);
-    bin2let(binFile, bin2letFile, matrix, row, col);
+    bin2let(binFile, bin2letFile, matrix, row, col, numNum);
 
     binFile.close();
     bin2letFile.close();
